@@ -62,11 +62,21 @@ class RewardModel:
 
         self.mutual_benefit = mutual_benefit
         self.discounts = discounts    # expects list of weights [6,3]
-#        self.mutual_weights = mutual_weights # weights for mutual benefit scheme
         self.total_discount_limit = total_discount_limit
         self.discount_limits = discount_limits # expects list of limits in %1 [0.5, 0.4]
 
         self.limited = len(discount_limits) > 0 or total_discount_limit < 1
+
+    def maximum_discount(self, num_sales, sale_price):
+        """
+        Returns maximum theoretical discount for a model. It doesn't consider limits in discounts
+        """
+        if self.mutual_benefit:
+            self.discounts[0] *= 2
+        discount1 = self.discounts[0] * sale_price
+        discount2 = self.discounts[1] * sale_price
+        maximum_discount = discount1 + (num_sales - 2) * (discount1 + discount2)
+        return maximum_discount
 
 def getNodeDiscounts(node, rewards):
     """
@@ -113,7 +123,7 @@ def generateRandomGraph(cooperation, numNodes, rewards):
     return graph
 
 
-def getSalesPerClient(graph, rewards):
+def get_sales_per_client(graph, rewards):
     """
     Returns list of the form [(2,4), (3,5)...]. One tuple for each node, the first element the number of first-grade sales
     and the second one the number of second-grade sales
@@ -130,8 +140,3 @@ def getSalesPerClient(graph, rewards):
         sales_per_node.append((sales_first_grade, sales_second_grade))
 
     return sales_per_node
-
-
-
-
-
